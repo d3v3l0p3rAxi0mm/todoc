@@ -105,9 +105,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
         configureViewModel();
         getTasks();
-        for (Project project : allProjects) {
-            getTasksByProject(project.getId());
-        }
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
@@ -131,9 +128,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     private void getTasks() {
         viewModel.getTasks().observe(this, this::updateTasks);
     }
-    private void getTasksByProject(long projectId) {
-        viewModel.getTasksByProject(projectId).observe(this, this::updateTasks);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,46 +138,18 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        long projectIdFilter = viewModel.getCurrentProjectIdFilter();
 
         if (id == R.id.filter_alphabetical) {
             sortMethod = SortMethod.ALPHABETICAL;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
         } else if (id == R.id.filter_alphabetical_inverted) {
             sortMethod = SortMethod.ALPHABETICAL_INVERTED;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
         } else if (id == R.id.filter_oldest_first) {
             sortMethod = SortMethod.OLD_FIRST;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
         } else if (id == R.id.filter_recent_first) {
             sortMethod = SortMethod.RECENT_FIRST;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
-        } else if (id == R.id.filter_allProjects) {
-            sortMethod = SortMethod.All_PROJECTS; getTasks();
-        } else if (id == R.id.filter_tartampion) {
-            sortMethod = SortMethod.TARTAMPION; getTasksByProject(1);
-        } else if (id == R.id.filter_lucidia) {
-            sortMethod = SortMethod.LUCIDIA; getTasksByProject(2);
-        } else if (id == R.id.filter_circus) {
-            sortMethod = SortMethod.CIRCUS; getTasksByProject(3);
         }
 
+        getTasks();
         //TODO POSER LA QUESTION : est ce que appeler getTasks ne créé pas un deuxième observeur ? pb mémoire
 
         return super.onOptionsItemSelected(item);

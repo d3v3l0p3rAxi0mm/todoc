@@ -17,15 +17,13 @@ public class MainActivityViewModel extends ViewModel {
 
     private final ProjectDataRepository projectDataSource;
     private final TaskDataRepository taskDataSource;
-    private Executor executor;
+    private final Executor executor;
 
     // DATA
     @Nullable
     private LiveData<List<Project>> currentProjects;
     @Nullable
     private LiveData<List<Task>> currentTasks;
-
-    private long currentProjectIdFilter = 0;
 
     public MainActivityViewModel(ProjectDataRepository projectDataSource, TaskDataRepository taskDataSource, Executor executor) {
         this.projectDataSource = projectDataSource;
@@ -45,21 +43,10 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public LiveData<List<Task>> getTasks() {
-        currentProjectIdFilter = 0;
         return taskDataSource.getTasks();
     }
 
-    public LiveData<List<Task>> getTasksByProject(long projectId) {
-        currentProjectIdFilter = projectId;
-        return taskDataSource.getTasksByProject(projectId);
-    }
-
-    public long getCurrentProjectIdFilter() {
-        return this.currentProjectIdFilter;
-    }
-
     public void createTask(Task task) {
-        currentProjectIdFilter = 0;
         executor.execute(() -> taskDataSource.createTask(task));
     }
 

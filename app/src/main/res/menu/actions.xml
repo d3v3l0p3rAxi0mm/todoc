@@ -5,32 +5,6 @@
     tools:context=".ui.MainActivity">
 
     <item
-        android:id="@+id/action_projectFilter"
-        android:icon="@drawable/ic_filter_list"
-        android:title="@string/label_action_filter"
-        app:showAsAction="ifRoom">
-        <menu>
-
-            <item
-                android:id="@+id/filter_allProjects"
-                android:title="@string/allProjects"
-                app:showAsAction="never|withText" />
-            <item
-                android:id="@+id/filter_tartampion"
-                android:title="@string/projet_tartampion"
-                app:showAsAction="never|withText" />
-            <item
-                android:id="@+id/filter_lucidia"
-                android:title="@string/projet_lucidia"
-                app:showAsAction="never|withText" />
-            <item
-                android:id="@+id/filter_circus"
-                android:title="@string/projet_circus"
-                app:showAsAction="never|withText" />
-        </menu>
-    </item>
-
-    <item
         android:id="@+id/action_filter"
         android:icon="@drawable/baseline_sort_by_alpha_24"
         android:title="@string/label_action_filter"
