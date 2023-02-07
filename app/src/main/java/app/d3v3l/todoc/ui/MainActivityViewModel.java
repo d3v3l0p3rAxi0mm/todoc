@@ -43,6 +43,7 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public LiveData<List<Task>> getTasks() {
+        currentTasks = taskDataSource.getTasks();
         return taskDataSource.getTasks();
     }
 

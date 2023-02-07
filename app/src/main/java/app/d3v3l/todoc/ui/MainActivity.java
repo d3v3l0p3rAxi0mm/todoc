@@ -16,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -102,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         configureViewModel();
         getTasks();
 
@@ -135,6 +138,25 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         return true;
     }
 
+
+    public <T> T getValue(final LiveData<T> liveData) throws InterruptedException {
+        final Object[] data = new Object[1];
+        final CountDownLatch latch = new CountDownLatch(1);
+        Observer<T> observer = new Observer<T>() {
+            @Override
+            public void onChanged(@Nullable T o) {
+                data[0] = o;
+                latch.countDown();
+                liveData.removeObserver(this);
+            }
+        };
+        liveData.observeForever(observer);
+        latch.await(2, TimeUnit.SECONDS);
+        //noinspection unchecked
+        return (T) data[0];
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -150,6 +172,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         }
 
         getTasks();
+        //updateTasks(viewModel.getTasks().getValue());
+
         //TODO POSER LA QUESTION : est ce que appeler getTasks ne créé pas un deuxième observeur ? pb mémoire
 
         return super.onOptionsItemSelected(item);
