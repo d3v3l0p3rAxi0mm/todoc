@@ -1,5 +1,7 @@
 package app.d3v3l.todoc.ui;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -18,12 +20,11 @@ public class MainActivityViewModel extends ViewModel {
     private final ProjectDataRepository projectDataSource;
     private final TaskDataRepository taskDataSource;
     private final Executor executor;
+    private long currentProjectIdFilter = 0;
 
     // DATA
     @Nullable
     private LiveData<List<Project>> currentProjects;
-    @Nullable
-    private LiveData<List<Task>> currentTasks;
 
     public MainActivityViewModel(ProjectDataRepository projectDataSource, TaskDataRepository taskDataSource, Executor executor) {
         this.projectDataSource = projectDataSource;
@@ -43,8 +44,16 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public LiveData<List<Task>> getTasks() {
-        currentTasks = taskDataSource.getTasks();
         return taskDataSource.getTasks();
+    }
+
+    public LiveData<List<Task>> getTasksByProjectId(long projectId) {
+        return taskDataSource.getTasksByProjectId(projectId);
+    }
+
+    public void setCurrentProjectIdFilter(long idProject) {
+        this.currentProjectIdFilter = idProject;
+        getTasksByProjectId(idProject);
     }
 
     public void createTask(Task task) {

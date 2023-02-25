@@ -2,6 +2,7 @@
     <string name="app_name">Todoc</string>
 
     <string name="label_action_filter">Filter</string>
+    <string name="label_action_order">Order</string>
 
     <string name="sort_alphabetical">A -&gt; Z</string>
     <string name="sort_alphabetical_invert">Z -&gt; A</string>
@@ -20,4 +21,9 @@
     <string name="projet_lucidia">Projet Lucidia</string>
     <string name="projet_circus">Projet Circus</string>
     <string name="allProjects">Tous les projets</string>
+    <string name="tartampion">Tartampion</string>
+    <string name="lucida">Lucida</string>
+    <string name="circus">Circus</string>
+    <string name="all_projects">All Projects</string>
+    <string name="lucidia">Lucidia</string>
 </resources>

@@ -1,29 +1,32 @@
 package app.d3v3l.todoc;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-
-import androidx.test.rule.ActivityTestRule;
-import android.view.View;
-import android.widget.TextView;
-
-import app.d3v3l.todoc.ui.MainActivity;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static app.d3v3l.todoc.TestUtils.withRecyclerView;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static java.lang.Thread.sleep;
+import static app.d3v3l.todoc.TestUtils.withRecyclerView;
+
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.contrib.RecyclerViewActions;
+import androidx.test.espresso.matcher.ViewMatchers;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import app.d3v3l.todoc.ui.MainActivity;
+import app.d3v3l.todoc.utils.DeleteFirstTaskInTasksList;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -36,14 +39,23 @@ public class MainActivityInstrumentedTest {
 
     @Rule
     //public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
-    public ActivityTestRule<MainActivity> rule = new ActivityTestRule(MainActivity.class);
+    public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void addAndRemoveTask() {
+    public void addAndRemoveTask() throws InterruptedException {
 
         MainActivity activity = rule.getActivity();
         TextView lblNoTask = activity.findViewById(R.id.lbl_no_task);
         RecyclerView listTasks = activity.findViewById(R.id.list_tasks);
+        ViewAction deleteFirstTaskInTasksList = new DeleteFirstTaskInTasksList();
+
+        // empty the tasks
+        int numberOfViewHolder = listTasks.getAdapter().getItemCount();
+        for (int i = 0; i < numberOfViewHolder; i++) {
+            onView(ViewMatchers.withId(R.id.list_tasks))
+                    .perform(RecyclerViewActions.actionOnItemAtPosition(0, deleteFirstTaskInTasksList));
+        }
+
 
         onView(withId(R.id.fab_add_task)).perform(click());
         onView(withId(R.id.txt_task_name)).perform(replaceText("Tâche example"));
@@ -65,8 +77,18 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
-    public void sortTasks() {
+    public void sortTasks() throws InterruptedException {
         MainActivity activity = rule.getActivity();
+        ViewAction deleteFirstTaskInTasksList = new DeleteFirstTaskInTasksList();
+        RecyclerView listTasks = activity.findViewById(R.id.list_tasks);
+
+        // empty the tasks
+        int numberOfViewHolder = listTasks.getAdapter().getItemCount();
+        for (int i = 0; i < numberOfViewHolder; i++) {
+            onView(ViewMatchers.withId(R.id.list_tasks))
+                    .perform(RecyclerViewActions.actionOnItemAtPosition(0, deleteFirstTaskInTasksList));
+        }
+
 
         onView(withId(R.id.fab_add_task)).perform(click());
         onView(withId(R.id.txt_task_name)).perform(replaceText("aaa Tâche example"));

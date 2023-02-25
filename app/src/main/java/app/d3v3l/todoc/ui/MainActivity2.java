@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -36,7 +38,7 @@ import java.util.List;
  *
  * @author Gaëtan HERFRAY
  */
-public class MainActivity extends AppCompatActivity implements TasksAdapter.DeleteTaskListener {
+public class MainActivity2 extends AppCompatActivity implements TasksAdapter.DeleteTaskListener {
 
     private MainActivityViewModel viewModel;
 
@@ -48,9 +50,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     /**
      * List of all current tasks of the application
      */
+    /* modified by Audrey*/
     @NonNull
-    private List<Task> tasks = new ArrayList<>();
-    private List<Task> filteredTasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<Task>();
 
     /**
      * The adapter which handles the list of tasks
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      */
     @NonNull
     private SortMethod sortMethod = SortMethod.NONE;
+
+    @NonNull
+    private FilterByProjectMethod filterByProjectMethod = FilterByProjectMethod.ALL_PROJECTS;
 
     /**
      * Dialog to create a new task
@@ -101,8 +106,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         configureViewModel();
         getTasks();
+        for (Project project : allProjects) {
+            getTasksByProject(project.getId());
+        }
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
@@ -123,12 +132,11 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         this.viewModel.init();
     }
 
-    private void getProjects() {
-        viewModel.getProjects().observe(this, this::updateProjects);
-    }
-
     private void getTasks() {
         viewModel.getTasks().observe(this, this::updateTasks);
+    }
+    private void getTasksByProject(long projectId) {
+        viewModel.getTasksByProjectId(projectId).observe(this, this::updateTasks);
     }
 
     @Override
@@ -137,41 +145,61 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         return true;
     }
 
-
+    /* modified by Audrey*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int id = item.getItemId();
-        if (id == R.id.filter_allProjects) {
-
-        } else if (id == R.id.filter_tartampion) {
-            //filteredTasks = viewModel.getTasksByProjectId(0);
-        } else if (id == R.id.filter_lucidia) {
-
-        } else if (id == R.id.filter_circus) {
-            viewModel.setCurrentProjectIdFilter(3);
-        }
-
+        long projectIdFilter = viewModel.getCurrentProjectIdFilter();
 
         if (id == R.id.filter_alphabetical) {
             sortMethod = SortMethod.ALPHABETICAL;
+           /* if (projectIdFilter == 0) {
+                getTasks();
+            } else {
+                getTasksByProject(projectIdFilter);
+            }*/
         } else if (id == R.id.filter_alphabetical_inverted) {
             sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+           /* if (projectIdFilter == 0) {
+                getTasks();
+            } else {
+                getTasksByProject(projectIdFilter);
+            }*/
         } else if (id == R.id.filter_oldest_first) {
             sortMethod = SortMethod.OLD_FIRST;
+          /*  if (projectIdFilter == 0) {
+                getTasks();
+            } else {
+                getTasksByProject(projectIdFilter);
+            }*/
         } else if (id == R.id.filter_recent_first) {
             sortMethod = SortMethod.RECENT_FIRST;
+          /*  if (projectIdFilter == 0) {
+                getTasks();
+            } else {
+                getTasksByProject(projectIdFilter);
+            }*/
         }
 
-        updateTasksGUI();
+        if (id == R.id.filter_allProjects) {
+            filterByProjectMethod = FilterByProjectMethod.ALL_PROJECTS;
+        } else if (id == R.id.filter_tartampion) {
+            filterByProjectMethod = FilterByProjectMethod.TARTAMPION;
+        } else if (id == R.id.filter_lucidia) {
+            filterByProjectMethod = FilterByProjectMethod.LUCIDIA;
+        } else if (id == R.id.filter_circus) {
+            filterByProjectMethod = FilterByProjectMethod.CIRCUS;
+        }
+
+        updateTasksGui(); // /* modified by Audrey*/
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     public void onDeleteTask(Task task) {
         viewModel.deleteTask(task);
     }
+
     /**
      * Called when the user clicks on the positive button of the Create Task Dialog.
      *
@@ -195,6 +223,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
+                // TODO: Replace this by id of persisted task
+                long id = (long) (Math.random() * 50000);
+
 
                 Task task = new Task(
                         taskProject.getId(),
@@ -203,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 );
 
                 addTask(task);
+
                 dialogInterface.dismiss();
             }
             // If name has been set, but project has not been set (this should never occur)
@@ -241,25 +273,18 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
 
     /**
-     * Updates the list of tasks for RecyclerView Adapter
-     */
-    private void updateTasks(List<Task> tasksToUpdate) {
-        this.adapter.updateTasks(tasksToUpdate);
-        this.tasks = tasksToUpdate;
-        updateTasksGUI();
-    }
-
-    /**
-     * Updates the list of tasks for RecyclerView Adapter
-     */
-    private void updateProjects(List<Project> projectsToUpdate) {
-        //TODO transform Projects Array in aList of Project
-    }
-
-    /**
      * Updates the list of tasks in the UI
      */
-    private void updateTasksGUI() {
+    /* modified by Audrey*/
+    private void updateTasks(List<Task> tasksList) {
+
+        this.adapter.updateTasks(tasksList);
+        this.tasks = tasksList;
+        updateTasksGui();
+    }
+
+/* modified by Audrey (added function) */
+    private void updateTasksGui(){
         if (tasks.size() == 0) {
             lblNoTasks.setVisibility(View.VISIBLE);
             listTasks.setVisibility(View.GONE);
@@ -280,6 +305,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                     Collections.sort(tasks, new Task.TaskOldComparator());
                     break;
             }
+
+            switch (filterByProjectMethod) {
+                case ALL_PROJECTS:
+                    Collections.sort(tasks, new Task.TaskAZComparator());
+                    break;
+
+            }
+
             adapter.updateTasks(tasks);
         }
     }
@@ -359,8 +392,35 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
          */
         OLD_FIRST,
         /**
+         * Only Project 1 : Tartampion
+         */
+        All_PROJECTS,
+        /**
+         * Only Project 1 : Tartampion
+         */
+        TARTAMPION,
+        /**
+         * Only Project 1 : Lucidia
+         */
+        LUCIDIA,
+        /**
+         * Only Project 1 : Circus
+         */
+        CIRCUS,
+        /**
          * No sort
          */
         NONE
     }
+
+    private enum FilterByProjectMethod {
+        /**
+         * Sort alphabetical by name
+         */
+        ALL_PROJECTS,
+        TARTAMPION,
+        LUCIDIA,
+        CIRCUS
+    }
+
 }

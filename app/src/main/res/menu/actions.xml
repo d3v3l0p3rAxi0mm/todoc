@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.MainActivity">
 
     <item
         android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter_list"
+        android:title="@string/label_action_filter"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/filter_allProjects"
+                android:title="@string/all_projects"
+                app:showAsAction="never|withText" />
+            <item
+                android:id="@+id/filter_tartampion"
+                android:title="@string/tartampion"
+                app:showAsAction="never|withText" />
+            <item
+                android:id="@+id/filter_lucidia"
+                android:title="@string/lucidia"
+                app:showAsAction="never|withText" />
+            <item
+                android:id="@+id/filter_circus"
+                android:title="@string/circus"
+                app:showAsAction="never|withText" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_order"
         android:icon="@drawable/baseline_sort_by_alpha_24"
         android:title="@string/label_action_filter"
         app:showAsAction="ifRoom">
