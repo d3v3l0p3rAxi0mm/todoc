@@ -5,7 +5,6 @@ plugins {
 android {
     namespace 'app.d3v3l.todoc'
     compileSdk 33
-
     defaultConfig {
         applicationId "app.d3v3l.todoc"
         minSdk 21
@@ -26,32 +25,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    sourceSets {
-        main {
-            java {
-                exclude 'app/d3v3l/todoc/ui/MainActivity2.java'
-            }
-        }
-        androidTest {
-            java {
-                exclude 'app/d3v3l/todoc/ui/MainActivity2.java'
-
-            }
-        }
-    }
-
 }
 
-
-
 dependencies {
-
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-
-
 
     // Annotations
     implementation 'org.jetbrains:annotations:15.0'
@@ -67,26 +47,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test:rules:1.5.0'
 
-
     //ROOM
     implementation "androidx.room:room-runtime:2.5.0"
     annotationProcessor "androidx.room:room-compiler:2.5.0"
-
-
-
-    //implementation 'androidx.appcompat:appcompat:1.6.0'
-
-    //androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    //androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    //androidTestImplementation 'androidx.test:runner:1.5.2'
-    //androidTestImplementation 'androidx.test:rules:1.5.0'
-    //testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
-
-    // Dao Tests
-    //androidTestImplementation 'androidx.arch.core:core-testing:2.1.0'
-
-    //ROOM
-    //implementation 'androidx.room:room-runtime:2.5.0'
-    //annotationProcessor 'androidx.room:room-compiler:2.5.0'
-    //testImplementation 'androidx.room:room-testing:2.5.0'
 }

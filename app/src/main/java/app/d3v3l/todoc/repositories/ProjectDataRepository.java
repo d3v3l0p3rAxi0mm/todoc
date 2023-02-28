@@ -15,15 +15,5 @@ public class ProjectDataRepository {
 
     // --- GET ---
     public LiveData<List<Project>> getAllProjects(){ return this.projectDao.getProjects(); }
-    public LiveData<Project> getProjectById(int projectId){ return this.projectDao.getProjectById(projectId); }
-
-    // --- CREATE ---
-    public void createProject(Project project){ projectDao.createProject(project); }
-
-    // --- DELETE ---
-    public void deleteProject(Project project) { projectDao.deleteProject(project); }
-
-    // --- UPDATE ---
-    public void updateProject(Project project){ projectDao.updateProject(project); }
 
 }

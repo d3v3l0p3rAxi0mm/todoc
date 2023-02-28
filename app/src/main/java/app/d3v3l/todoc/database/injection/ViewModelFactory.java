@@ -2,7 +2,6 @@ package app.d3v3l.todoc.database.injection;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
