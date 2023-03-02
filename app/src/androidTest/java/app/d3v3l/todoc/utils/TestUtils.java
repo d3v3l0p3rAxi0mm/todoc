@@ -1,4 +1,4 @@
-package app.d3v3l.todoc;
+package app.d3v3l.todoc.utils;
 
 import androidx.annotation.IdRes;
 import androidx.test.espresso.PerformException;
@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+
+import app.d3v3l.todoc.utils.RecyclerViewMatcher;
 
 /**
  * Created by dannyroa on 5/9/15.

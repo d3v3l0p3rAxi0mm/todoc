@@ -1,4 +1,4 @@
-package app.d3v3l.todoc;
+package app.d3v3l.todoc.utils;
 
 import android.content.res.Resources;
 import android.view.View;
