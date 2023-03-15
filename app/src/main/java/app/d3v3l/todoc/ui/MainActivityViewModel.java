@@ -17,7 +17,9 @@ public class MainActivityViewModel extends ViewModel {
 
     private final ProjectDataRepository projectDataSource;
     private final TaskDataRepository taskDataSource;
-    private final Executor executor;
+    private final LiveData<List<Project>> allProjects;
+    //Executor
+    private static Executor mExecutor;
     private long currentProjectIdFilter = 0;
 
     // DATA
@@ -27,8 +29,21 @@ public class MainActivityViewModel extends ViewModel {
     public MainActivityViewModel(ProjectDataRepository projectDataSource, TaskDataRepository taskDataSource, Executor executor) {
         this.projectDataSource = projectDataSource;
         this.taskDataSource = taskDataSource;
-        this.executor = executor;
+        this.mExecutor = executor;
+        allProjects = projectDataSource.getAllProjects();
     }
+
+
+
+    /**
+     * Gets executor.
+     *
+     * @return the executor
+     */
+    public static Executor getExecutor() {
+        return mExecutor;
+    }
+
 
     public void init() {
         if (this.currentProjects != null) {
@@ -52,11 +67,13 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void createTask(Task task) {
-        executor.execute(() -> taskDataSource.createTask(task));
+        //TODO Explication : pourquoi avoir supprimé executor qui permet l'execution en arrière plan ?
+        taskDataSource.createTask(task);
+
     }
 
     public void deleteTask(Task task) {
-        executor.execute(() -> taskDataSource.deleteTask(task));
+        taskDataSource.deleteTask(task);
     }
 
 }
