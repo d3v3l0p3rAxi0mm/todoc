@@ -12,13 +12,18 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.InvalidationTracker;
 
 import app.d3v3l.todoc.R;
 import app.d3v3l.todoc.database.injection.ViewModelFactory;
@@ -29,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -100,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d("MyLog", "Create MainActivity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configureViewModel();
@@ -121,10 +126,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     }
 
     private void getTasks() {
-        viewModel.getTasks().removeObservers(this);
+        viewModel.getTasks().removeObserver(this::updateTasks);
         viewModel.getTasks().observe(this, this::updateTasks);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(@NonNull Menu menu) {
@@ -134,34 +138,34 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        // If user click on sub-menu item
+        if (!item.toString().equals("Filter") && !item.toString().equals("Order")) {
+            int id = item.getItemId();
+            if (id == R.id.filter_alphabetical) {
+                sortMethod = SortMethod.ALPHABETICAL;
+                updateTasksGui();
+            } else if (id == R.id.filter_alphabetical_inverted) {
+                sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+                updateTasksGui();
+            } else if (id == R.id.filter_oldest_first) {
+                sortMethod = SortMethod.OLD_FIRST;
+                updateTasksGui();
+            } else if (id == R.id.filter_recent_first) {
+                sortMethod = SortMethod.RECENT_FIRST;
+                updateTasksGui();
+            } else {
+                if (id == R.id.filter_allProjects) {
+                    viewModel.setCurrentProjectIdFilter(0);
+                } else if (id == R.id.filter_tartampion) {
+                    viewModel.setCurrentProjectIdFilter(1);
+                } else if (id == R.id.filter_lucidia) {
+                    viewModel.setCurrentProjectIdFilter(2);
+                } else if (id == R.id.filter_circus) {
+                    viewModel.setCurrentProjectIdFilter(3);
+                }
+                getTasks();
+            }
 
-        if (id == R.id.filter_alphabetical) {
-            sortMethod = SortMethod.ALPHABETICAL;
-        } else if (id == R.id.filter_alphabetical_inverted) {
-            sortMethod = SortMethod.ALPHABETICAL_INVERTED;
-        } else if (id == R.id.filter_oldest_first) {
-            sortMethod = SortMethod.OLD_FIRST;
-        } else if (id == R.id.filter_recent_first) {
-            sortMethod = SortMethod.RECENT_FIRST;
-        }
-
-        if (id == R.id.filter_allProjects) {
-            viewModel.setCurrentProjectIdFilter(0);
-            getTasks();
-        } else if (id == R.id.filter_tartampion) {
-            viewModel.setCurrentProjectIdFilter(1);
-            getTasks();
-        } else if (id == R.id.filter_lucidia) {
-            viewModel.setCurrentProjectIdFilter(2);
-            getTasks();
-        } else if (id == R.id.filter_circus) {
-            viewModel.setCurrentProjectIdFilter(3);
-            getTasks();
-        }
-        if (!item.toString().equals("Filter")) {
-            Log.d("Filter","updateTasksGui");
-            updateTasksGui();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -199,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                         taskName,
                         new Date().getTime()
                 );
-                viewModel.setCurrentProjectIdFilter(taskProject.getId());
                 addTask(task);
                 dialogInterface.dismiss();
             }
@@ -232,14 +235,14 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      */
     private void addTask(@NonNull Task task) {
         viewModel.createTask(task);
-        getTasks();
     }
 
     /**
      * Updates the list of tasks in the UI
      */
     private void updateTasks(List<Task> tasksList) {
-        this.adapter.updateTasks(tasksList);
+        Log.d("UpdateTask", "CFId > " + viewModel.getCurrentProjectIdFilter());
+        //this.adapter.updateTasks(tasksList);
         this.tasks = tasksList;
         updateTasksGui();
     }
@@ -265,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                     Collections.sort(tasks, new Task.TaskOldComparator());
                     break;
             }
-
             adapter.updateTasks(tasks);
         }
     }

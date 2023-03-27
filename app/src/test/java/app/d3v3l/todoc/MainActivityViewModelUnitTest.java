@@ -63,8 +63,6 @@ public class MainActivityViewModelUnitTest {
 
     @Rule
     public InstantTaskExecutorRule rule = new InstantTaskExecutorRule();
-    @Mock // ProjectRepository to use on test
-    private ProjectDataRepository mockProjectRepository;
     @Mock // TaskRepository to use on test
     private TaskDataRepository mockTaskRepository;
     // ViewModel to use on test
@@ -75,10 +73,10 @@ public class MainActivityViewModelUnitTest {
     @Before
     public void setup() {
         //Mock LiveDatas from repositories
-        mocking_mListOfProjectMutableLiveData();
+        //mocking_mListOfProjectMutableLiveData();
         mocking_mListOfTaskMutableLiveData();
         //Instantiate MainViewModel for testing, passing mocked repositories
-        underTestMainActivityViewModel = new MainActivityViewModel(mockProjectRepository, mockTaskRepository, testExecutor);
+        underTestMainActivityViewModel = new MainActivityViewModel(mockTaskRepository, testExecutor);
     }
 
     @After
@@ -110,11 +108,6 @@ public class MainActivityViewModelUnitTest {
     }
 
 
-
-    private void mocking_mListOfProjectMutableLiveData() {
-        mListOfProjectMutableLiveData.setValue(getAllProjectsForTest());
-        doReturn(mListOfProjectMutableLiveData).when(mockProjectRepository).getAllProjects();
-    }
 
     private void mocking_mListOfTaskMutableLiveData() {
         List<Task> listOfTask = Arrays.asList(

@@ -1,7 +1,6 @@
 package app.d3v3l.todoc.database;
 
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -26,6 +25,9 @@ public abstract class TodocDatabase extends RoomDatabase {
     public abstract TaskDao taskDao();
 
     // --- INSTANCE ---
+    // We should never used '.allowMainThreadQueries()'
+    //TODO remove allowMainThreadQueries()
+
     public static TodocDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (TodocDatabase.class) {
@@ -33,6 +35,7 @@ public abstract class TodocDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                TodocDatabase.class, "database.db")
                             .addCallback(prepopulateDatabase())
+                            .allowMainThreadQueries()
                             .build();
                 }
             }

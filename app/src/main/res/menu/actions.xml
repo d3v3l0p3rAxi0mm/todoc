@@ -33,7 +33,7 @@
     <item
         android:id="@+id/action_order"
         android:icon="@drawable/baseline_sort_by_alpha_24"
-        android:title="@string/label_action_filter"
+        android:title="@string/label_action_order"
         app:showAsAction="ifRoom">
         <menu>
             <item

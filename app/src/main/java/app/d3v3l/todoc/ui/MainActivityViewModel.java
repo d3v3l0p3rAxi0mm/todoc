@@ -1,5 +1,7 @@
 package app.d3v3l.todoc.ui;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -15,29 +17,25 @@ import java.util.concurrent.Executor;
 
 public class MainActivityViewModel extends ViewModel {
 
-    private final ProjectDataRepository projectDataSource;
+    //private final ProjectDataRepository projectDataSource;
     private final TaskDataRepository taskDataSource;
-    private final LiveData<List<Project>> allProjects;
     //Executor
     private static Executor mExecutor;
-    private long currentProjectIdFilter = 0;
+    public static long currentProjectIdFilter;
 
     // DATA
-    @Nullable
-    private LiveData<List<Project>> currentProjects;
+    //@Nullable
+    //private LiveData<List<Project>> currentProjects;
 
-    public MainActivityViewModel(ProjectDataRepository projectDataSource, TaskDataRepository taskDataSource, Executor executor) {
-        this.projectDataSource = projectDataSource;
+    public MainActivityViewModel(TaskDataRepository taskDataSource, Executor executor) {
+        //this.projectDataSource = projectDataSource;
         this.taskDataSource = taskDataSource;
-        this.mExecutor = executor;
-        allProjects = projectDataSource.getAllProjects();
+        mExecutor = executor;
+        currentProjectIdFilter = 0;
     }
-
-
 
     /**
      * Gets executor.
-     *
      * @return the executor
      */
     public static Executor getExecutor() {
@@ -46,10 +44,13 @@ public class MainActivityViewModel extends ViewModel {
 
 
     public void init() {
+        /*
         if (this.currentProjects != null) {
+
             return;
         }
         currentProjects = projectDataSource.getAllProjects();
+         */
     }
 
     public LiveData<List<Task>> getTasks() {
@@ -63,13 +64,15 @@ public class MainActivityViewModel extends ViewModel {
     }
 
     public void setCurrentProjectIdFilter(long idProject) {
-        this.currentProjectIdFilter = idProject;
+        currentProjectIdFilter = idProject;
+    }
+
+    public long getCurrentProjectIdFilter() {
+        return currentProjectIdFilter;
     }
 
     public void createTask(Task task) {
-        //TODO Explication : pourquoi avoir supprimé executor qui permet l'execution en arrière plan ?
         taskDataSource.createTask(task);
-
     }
 
     public void deleteTask(Task task) {

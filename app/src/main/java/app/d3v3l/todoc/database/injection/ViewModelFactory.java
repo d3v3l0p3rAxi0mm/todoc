@@ -45,7 +45,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     @NotNull
     public <T extends ViewModel> T create(Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
-            return (T) new MainActivityViewModel(projectDataSource, taskDataSource, executor);
+            return (T) new MainActivityViewModel(taskDataSource, executor);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
