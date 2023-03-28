@@ -33,8 +33,11 @@ import app.d3v3l.todoc.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -54,9 +57,13 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     /**
      * List of all current tasks of the application
      */
-    /* modified by Audrey*/
     @NonNull
     private List<Task> tasks = new ArrayList<>();
+    /**
+     * List of filtered tasks by project of the application
+     */
+    @NonNull
+    private List<Task> filteredtasks;
 
     /**
      * The adapter which handles the list of tasks
@@ -104,15 +111,18 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private TextView lblNoTasks;
 
+    private TextView lblProjectName;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configureViewModel();
-        getTasks(true);
+        getTasks();
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
+        lblProjectName = findViewById(R.id.lbl_optional_name_of_project);
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
@@ -124,10 +134,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         this.viewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(MainActivityViewModel.class);
     }
 
-    private void getTasks(Boolean firstCall) {
-        if (!firstCall) {
-            viewModel.getTasks().removeObservers(this);
-        }
+    private void getTasks() {
         viewModel.getTasks().observe(this, this::updateTasks);
     }
 
@@ -142,31 +149,37 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         // If user click on sub-menu item
         if (!item.toString().equals("Filter") && !item.toString().equals("Order")) {
             int id = item.getItemId();
-            if (id == R.id.filter_alphabetical) {
-                sortMethod = SortMethod.ALPHABETICAL;
-                updateTasksGui();
-            } else if (id == R.id.filter_alphabetical_inverted) {
-                sortMethod = SortMethod.ALPHABETICAL_INVERTED;
-                updateTasksGui();
-            } else if (id == R.id.filter_oldest_first) {
-                sortMethod = SortMethod.OLD_FIRST;
-                updateTasksGui();
-            } else if (id == R.id.filter_recent_first) {
-                sortMethod = SortMethod.RECENT_FIRST;
+
+            if (id == R.id.filter_alphabetical ||
+                id == R.id.filter_alphabetical_inverted ||
+                id == R.id.filter_oldest_first ||
+                id == R.id.filter_recent_first)
+            {
+                if (id == R.id.filter_alphabetical) {
+                    sortMethod = SortMethod.ALPHABETICAL;
+                } else if (id == R.id.filter_alphabetical_inverted) {
+                    sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+                } else if (id == R.id.filter_oldest_first) {
+                    sortMethod = SortMethod.OLD_FIRST;
+                } else if (id == R.id.filter_recent_first) {
+                    sortMethod = SortMethod.RECENT_FIRST;
+                }
                 updateTasksGui();
             } else {
                 if (id == R.id.filter_allProjects) {
                     viewModel.setCurrentProjectIdFilter(0);
+                    updateTasksByProjectGui(0);
                 } else if (id == R.id.filter_tartampion) {
                     viewModel.setCurrentProjectIdFilter(1);
+                    updateTasksByProjectGui(1);
                 } else if (id == R.id.filter_lucidia) {
                     viewModel.setCurrentProjectIdFilter(2);
+                    updateTasksByProjectGui(2);
                 } else if (id == R.id.filter_circus) {
                     viewModel.setCurrentProjectIdFilter(3);
+                    updateTasksByProjectGui(3);
                 }
-                getTasks(false);
             }
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -242,35 +255,78 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * Updates the list of tasks in the UI
      */
     private void updateTasks(List<Task> tasksList) {
-        Log.d("UpdateTask", "CFId > " + viewModel.getCurrentProjectIdFilter());
-        //this.adapter.updateTasks(tasksList);
         this.tasks = tasksList;
-        updateTasksGui();
+        updateTasksByProjectGui(viewModel.getCurrentProjectIdFilter());
     }
 
     private void updateTasksGui(){
+        List<Task> listOfTask;
+        if (viewModel.getCurrentProjectIdFilter()==0) {
+            listOfTask = tasks;
+        } else {
+            listOfTask = filteredtasks;
+        }
+        if (listOfTask.size() == 0) {
+            lblProjectName.setText(messageNoTask());
+            lblNoTasks.setVisibility(View.VISIBLE);
+            lblProjectName.setVisibility(View.VISIBLE);
+            listTasks.setVisibility(View.GONE);
+        } else {
+            lblNoTasks.setVisibility(View.GONE);
+            listTasks.setVisibility(View.VISIBLE);
+            lblProjectName.setVisibility(View.GONE);
+            switch (sortMethod) {
+                case ALPHABETICAL:
+                    Collections.sort(listOfTask, new Task.TaskAZComparator());
+                    break;
+                case ALPHABETICAL_INVERTED:
+                    Collections.sort(listOfTask, new Task.TaskZAComparator());
+                    break;
+                case RECENT_FIRST:
+                    Collections.sort(listOfTask, new Task.TaskRecentComparator());
+                    break;
+                case OLD_FIRST:
+                    Collections.sort(listOfTask, new Task.TaskOldComparator());
+                    break;
+            }
+            adapter.updateTasks(listOfTask);
+        }
+    }
+
+    private void updateTasksByProjectGui(long projectId){
+
         if (tasks.size() == 0) {
+            lblProjectName.setText(messageNoTask());
+            lblProjectName.setVisibility(View.VISIBLE);
             lblNoTasks.setVisibility(View.VISIBLE);
             listTasks.setVisibility(View.GONE);
         } else {
             lblNoTasks.setVisibility(View.GONE);
             listTasks.setVisibility(View.VISIBLE);
-            switch (sortMethod) {
-                case ALPHABETICAL:
-                    Collections.sort(tasks, new Task.TaskAZComparator());
-                    break;
-                case ALPHABETICAL_INVERTED:
-                    Collections.sort(tasks, new Task.TaskZAComparator());
-                    break;
-                case RECENT_FIRST:
-                    Collections.sort(tasks, new Task.TaskRecentComparator());
-                    break;
-                case OLD_FIRST:
-                    Collections.sort(tasks, new Task.TaskOldComparator());
-                    break;
+            lblProjectName.setVisibility(View.GONE);
+            filteredtasks = new ArrayList<>();
+            if (projectId != 0) {
+                for (Task task: tasks) {
+                    if (task.getProjectId() == projectId) {
+                        filteredtasks.add(task);
+                    }
+                }
+            } else {
+                filteredtasks = tasks;
             }
-            adapter.updateTasks(tasks);
+            updateTasksGui();
         }
+    }
+
+    private String messageNoTask() {
+        String txt;
+        if (viewModel.currentProjectIdFilter == 0) {
+            txt = "";
+        }
+        else {
+            txt = Objects.requireNonNull(Project.getProjectById(viewModel.currentProjectIdFilter)).getName();
+        }
+        return txt;
     }
 
     /**

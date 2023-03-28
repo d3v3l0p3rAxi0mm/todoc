@@ -6,6 +6,21 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/lbl_optional_name_of_project"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/lbl_no_task"
+        android:layout_centerInParent="false"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="top"
+        android:layout_marginBottom="10dp"
+        android:gravity="center_horizontal"
+        android:text=""
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        tools:visibility="gone" />
+    <TextView
         android:id="@+id/lbl_no_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -13,7 +28,7 @@
         android:drawableTop="@drawable/ic_work_off"
         android:gravity="center_horizontal"
         android:text="@string/no_task"
-        android:textSize="22sp"
+        android:textSize="20sp"
         tools:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView

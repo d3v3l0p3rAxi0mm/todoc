@@ -12,7 +12,7 @@
     <string name="add_task">Ajouter une tâche</string>
     <string name="add">Ajouter</string>
 
-    <string name="no_task">Tu n’as aucune tâche à traiter</string>
+    <string name="no_task">Aucune tâche à traiter</string>
 
     <string name="task_name_hint">Nom de la tâche</string>
 
