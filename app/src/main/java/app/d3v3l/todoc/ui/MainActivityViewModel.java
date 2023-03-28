@@ -43,16 +43,6 @@ public class MainActivityViewModel extends ViewModel {
     }
 
 
-    public void init() {
-        /*
-        if (this.currentProjects != null) {
-
-            return;
-        }
-        currentProjects = projectDataSource.getAllProjects();
-         */
-    }
-
     public LiveData<List<Task>> getTasks() {
         if (currentProjectIdFilter==0) {
             // No filter > return all tasks

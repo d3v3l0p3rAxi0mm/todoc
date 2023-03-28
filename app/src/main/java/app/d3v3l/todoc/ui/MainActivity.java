@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configureViewModel();
-        getTasks();
+        getTasks(true);
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
@@ -122,11 +122,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     private void configureViewModel() {
         this.viewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(MainActivityViewModel.class);
-        this.viewModel.init();
     }
 
-    private void getTasks() {
-        viewModel.getTasks().removeObserver(this::updateTasks);
+    private void getTasks(Boolean firstCall) {
+        if (!firstCall) {
+            viewModel.getTasks().removeObservers(this);
+        }
         viewModel.getTasks().observe(this, this::updateTasks);
     }
 
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 } else if (id == R.id.filter_circus) {
                     viewModel.setCurrentProjectIdFilter(3);
                 }
-                getTasks();
+                getTasks(false);
             }
 
         }
