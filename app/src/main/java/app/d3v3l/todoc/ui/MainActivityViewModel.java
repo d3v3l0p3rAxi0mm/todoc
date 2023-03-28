@@ -21,7 +21,7 @@ public class MainActivityViewModel extends ViewModel {
     private final TaskDataRepository taskDataSource;
     //Executor
     private static Executor mExecutor;
-    public static long currentProjectIdFilter;
+    public long currentProjectIdFilter;
 
     // DATA
     //@Nullable
