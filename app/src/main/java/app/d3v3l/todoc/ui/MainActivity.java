@@ -12,14 +12,18 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.InvalidationTracker;
 
 import app.d3v3l.todoc.R;
 import app.d3v3l.todoc.database.injection.ViewModelFactory;
@@ -29,7 +33,10 @@ import app.d3v3l.todoc.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +58,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * List of all current tasks of the application
      */
     @NonNull
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
+    /**
+     * List of filtered tasks by project of the application
+     */
+    @NonNull
+    private List<Task> filteredtasks;
 
     /**
      * The adapter which handles the list of tasks
@@ -62,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * The sort method to be used to display tasks
      */
     @NonNull
-    private SortMethod sortMethod = SortMethod.NONE;
+    private SortMethod sortMethod = SortMethod.OLD_FIRST;
+
 
     /**
      * Dialog to create a new task
@@ -98,94 +111,76 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private TextView lblNoTasks;
 
+    private TextView lblProjectName;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         configureViewModel();
         getTasks();
-        for (Project project : allProjects) {
-            getTasksByProject(project.getId());
-        }
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
+        lblProjectName = findViewById(R.id.lbl_optional_name_of_project);
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
 
-        findViewById(R.id.fab_add_task).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAddTaskDialog();
-            }
-        });
+        findViewById(R.id.fab_add_task).setOnClickListener(view -> showAddTaskDialog());
     }
 
     private void configureViewModel() {
         this.viewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(MainActivityViewModel.class);
-        this.viewModel.init();
     }
 
     private void getTasks() {
         viewModel.getTasks().observe(this, this::updateTasks);
     }
-    private void getTasksByProject(long projectId) {
-        viewModel.getTasksByProject(projectId).observe(this, this::updateTasks);
-    }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.actions, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        long projectIdFilter = viewModel.getCurrentProjectIdFilter();
+        // If user click on sub-menu item
+        if (!item.toString().equals("Filter") && !item.toString().equals("Order")) {
+            int id = item.getItemId();
 
-        if (id == R.id.filter_alphabetical) {
-            sortMethod = SortMethod.ALPHABETICAL;
-            if (projectIdFilter == 0) {
-                getTasks();
+            if (id == R.id.filter_alphabetical ||
+                id == R.id.filter_alphabetical_inverted ||
+                id == R.id.filter_oldest_first ||
+                id == R.id.filter_recent_first)
+            {
+                if (id == R.id.filter_alphabetical) {
+                    sortMethod = SortMethod.ALPHABETICAL;
+                } else if (id == R.id.filter_alphabetical_inverted) {
+                    sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+                } else if (id == R.id.filter_oldest_first) {
+                    sortMethod = SortMethod.OLD_FIRST;
+                } else if (id == R.id.filter_recent_first) {
+                    sortMethod = SortMethod.RECENT_FIRST;
+                }
+                updateTasksGui();
             } else {
-                getTasksByProject(projectIdFilter);
+                if (id == R.id.filter_allProjects) {
+                    viewModel.setCurrentProjectIdFilter(0);
+                    updateTasksByProjectGui(0);
+                } else if (id == R.id.filter_tartampion) {
+                    viewModel.setCurrentProjectIdFilter(1);
+                    updateTasksByProjectGui(1);
+                } else if (id == R.id.filter_lucidia) {
+                    viewModel.setCurrentProjectIdFilter(2);
+                    updateTasksByProjectGui(2);
+                } else if (id == R.id.filter_circus) {
+                    viewModel.setCurrentProjectIdFilter(3);
+                    updateTasksByProjectGui(3);
+                }
             }
-        } else if (id == R.id.filter_alphabetical_inverted) {
-            sortMethod = SortMethod.ALPHABETICAL_INVERTED;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
-        } else if (id == R.id.filter_oldest_first) {
-            sortMethod = SortMethod.OLD_FIRST;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
-        } else if (id == R.id.filter_recent_first) {
-            sortMethod = SortMethod.RECENT_FIRST;
-            if (projectIdFilter == 0) {
-                getTasks();
-            } else {
-                getTasksByProject(projectIdFilter);
-            }
-        } else if (id == R.id.filter_allProjects) {
-            sortMethod = SortMethod.All_PROJECTS; getTasks();
-        } else if (id == R.id.filter_tartampion) {
-            sortMethod = SortMethod.TARTAMPION; getTasksByProject(1);
-        } else if (id == R.id.filter_lucidia) {
-            sortMethod = SortMethod.LUCIDIA; getTasksByProject(2);
-        } else if (id == R.id.filter_circus) {
-            sortMethod = SortMethod.CIRCUS; getTasksByProject(3);
         }
-
-        //TODO POSER LA QUESTION : est ce que appeler getTasks ne créé pas un deuxième observeur ? pb mémoire
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -217,18 +212,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-                long id = (long) (Math.random() * 50000);
-
-
                 Task task = new Task(
                         taskProject.getId(),
                         taskName,
                         new Date().getTime()
                 );
-
                 addTask(task);
-
                 dialogInterface.dismiss();
             }
             // If name has been set, but project has not been set (this should never occur)
@@ -247,12 +236,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      */
     private void showAddTaskDialog() {
         final AlertDialog dialog = getAddTaskDialog();
-
         dialog.show();
-
         dialogEditText = dialog.findViewById(R.id.txt_task_name);
         dialogSpinner = dialog.findViewById(R.id.project_spinner);
-
         populateDialogSpinner();
     }
 
@@ -265,33 +251,82 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         viewModel.createTask(task);
     }
 
-
     /**
      * Updates the list of tasks in the UI
      */
-    private void updateTasks(List<Task> tasks) {
+    private void updateTasks(List<Task> tasksList) {
+        this.tasks = tasksList;
+        updateTasksByProjectGui(viewModel.getCurrentProjectIdFilter());
+    }
+
+    private void updateTasksGui(){
+        List<Task> listOfTask;
+        if (viewModel.getCurrentProjectIdFilter()==0) {
+            listOfTask = tasks;
+        } else {
+            listOfTask = filteredtasks;
+        }
+        if (listOfTask.size() == 0) {
+            lblProjectName.setText(messageNoTask());
+            lblNoTasks.setVisibility(View.VISIBLE);
+            lblProjectName.setVisibility(View.VISIBLE);
+            listTasks.setVisibility(View.GONE);
+        } else {
+            lblNoTasks.setVisibility(View.GONE);
+            listTasks.setVisibility(View.VISIBLE);
+            lblProjectName.setVisibility(View.GONE);
+            switch (sortMethod) {
+                case ALPHABETICAL:
+                    Collections.sort(listOfTask, new Task.TaskAZComparator());
+                    break;
+                case ALPHABETICAL_INVERTED:
+                    Collections.sort(listOfTask, new Task.TaskZAComparator());
+                    break;
+                case RECENT_FIRST:
+                    Collections.sort(listOfTask, new Task.TaskRecentComparator());
+                    break;
+                case OLD_FIRST:
+                    Collections.sort(listOfTask, new Task.TaskOldComparator());
+                    break;
+            }
+            adapter.updateTasks(listOfTask);
+        }
+    }
+
+    private void updateTasksByProjectGui(long projectId){
+
         if (tasks.size() == 0) {
+            lblProjectName.setText(messageNoTask());
+            lblProjectName.setVisibility(View.VISIBLE);
             lblNoTasks.setVisibility(View.VISIBLE);
             listTasks.setVisibility(View.GONE);
         } else {
             lblNoTasks.setVisibility(View.GONE);
             listTasks.setVisibility(View.VISIBLE);
-            switch (sortMethod) {
-                case ALPHABETICAL:
-                    Collections.sort(tasks, new Task.TaskAZComparator());
-                    break;
-                case ALPHABETICAL_INVERTED:
-                    Collections.sort(tasks, new Task.TaskZAComparator());
-                    break;
-                case RECENT_FIRST:
-                    Collections.sort(tasks, new Task.TaskRecentComparator());
-                    break;
-                case OLD_FIRST:
-                    Collections.sort(tasks, new Task.TaskOldComparator());
-                    break;
+            lblProjectName.setVisibility(View.GONE);
+            filteredtasks = new ArrayList<>();
+            if (projectId != 0) {
+                for (Task task: tasks) {
+                    if (task.getProjectId() == projectId) {
+                        filteredtasks.add(task);
+                    }
+                }
+            } else {
+                filteredtasks = tasks;
             }
-            adapter.updateTasks(tasks);
+            updateTasksGui();
         }
+    }
+
+    private String messageNoTask() {
+        String txt;
+        if (viewModel.currentProjectIdFilter == 0) {
+            txt = "";
+        }
+        else {
+            txt = Objects.requireNonNull(Project.getProjectById(viewModel.currentProjectIdFilter)).getName();
+        }
+        return txt;
     }
 
     /**
@@ -302,36 +337,19 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
     @NonNull
     private AlertDialog getAddTaskDialog() {
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this, R.style.Dialog);
-
         alertBuilder.setTitle(R.string.add_task);
         alertBuilder.setView(R.layout.dialog_add_task);
         alertBuilder.setPositiveButton(R.string.add, null);
-        alertBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface) {
-                dialogEditText = null;
-                dialogSpinner = null;
-                dialog = null;
-            }
+        alertBuilder.setOnDismissListener(dialogInterface -> {
+            dialogEditText = null;
+            dialogSpinner = null;
+            dialog = null;
         });
-
         dialog = alertBuilder.create();
-
         // This instead of listener to positive button in order to avoid automatic dismiss
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-
-                Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                button.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        onPositiveButtonClick(dialog);
-                    }
-                });
-            }
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> onPositiveButtonClick(dialog));
         });
 
         return dialog;
@@ -367,26 +385,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         /**
          * First created first
          */
-        OLD_FIRST,
-        /**
-         * Only Project 1 : Tartampion
-         */
-        All_PROJECTS,
-        /**
-         * Only Project 1 : Tartampion
-         */
-        TARTAMPION,
-        /**
-         * Only Project 1 : Lucidia
-         */
-        LUCIDIA,
-        /**
-         * Only Project 1 : Circus
-         */
-        CIRCUS,
-        /**
-         * No sort
-         */
-        NONE
+        OLD_FIRST
     }
+
 }

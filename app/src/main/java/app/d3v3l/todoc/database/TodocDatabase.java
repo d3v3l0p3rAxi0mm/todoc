@@ -25,6 +25,9 @@ public abstract class TodocDatabase extends RoomDatabase {
     public abstract TaskDao taskDao();
 
     // --- INSTANCE ---
+    // We should never used '.allowMainThreadQueries()'
+    //TODO remove allowMainThreadQueries()
+
     public static TodocDatabase getInstance(Context context) {
         if (INSTANCE == null) {
             synchronized (TodocDatabase.class) {
@@ -32,6 +35,7 @@ public abstract class TodocDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                TodocDatabase.class, "database.db")
                             .addCallback(prepopulateDatabase())
+                            .allowMainThreadQueries()
                             .build();
                 }
             }
@@ -50,6 +54,7 @@ public abstract class TodocDatabase extends RoomDatabase {
                     Executors.newSingleThreadExecutor().execute(() -> INSTANCE.projectDao()
                             .createProject(new Project(project.getId(), project.getName(), project.getColor())));
                 }
+
             }
         };
     }
