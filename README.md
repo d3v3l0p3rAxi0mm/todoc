@@ -14,7 +14,19 @@ The work to be done was to create data persistence using a local SQLite database
 All this while respecting the principles of Android Architecture Components.
 
 ## Screenshots
+
+1. Empty list
+
 ![Image text](/app/src/main/res/drawable/todoc.png)
+
+2. To List
+
 ![Image text](/app/src/main/res/drawable/todo2.png)
+
+3. Filter by Project
+
 ![Image text](/app/src/main/res/drawable/todo3.png)
+
+4. Order by Name or Date
+
 ![Image text](/app/src/main/res/drawable/todo4.png)
