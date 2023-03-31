@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * List of filtered tasks by project of the application
      */
     @NonNull
-    private List<Task> filteredtasks;
+    private List<Task> filteredtasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                     sortMethod = SortMethod.ALPHABETICAL_INVERTED;
                 } else if (id == R.id.filter_oldest_first) {
                     sortMethod = SortMethod.OLD_FIRST;
-                } else if (id == R.id.filter_recent_first) {
+                } else { // if (id == R.id.filter_recent_first)
                     sortMethod = SortMethod.RECENT_FIRST;
                 }
                 updateTasksGui();
@@ -169,6 +169,9 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 } else if (id == R.id.filter_circus) {
                     viewModel.setCurrentProjectIdFilter(3);
                     updateTasksByProjectGui(3);
+                } else if (id == R.id.filter_alibaba) {
+                    viewModel.setCurrentProjectIdFilter(4);
+                    updateTasksByProjectGui(4);
                 }
             }
         }
@@ -247,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      */
     private void updateTasks(List<Task> tasksList) {
         this.tasks = tasksList;
+        // if current project is 0 (all projects) updateTasksByProjectGui will go on updateTasksGui
         updateTasksByProjectGui(viewModel.getCurrentProjectIdFilter());
     }
 
@@ -302,8 +306,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                         filteredtasks.add(task);
                     }
                 }
-            } else {
-                filteredtasks = tasks;
             }
             updateTasksGui();
         }

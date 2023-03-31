@@ -1,15 +1,9 @@
 package app.d3v3l.todoc.ui;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
-import org.jetbrains.annotations.Nullable;
-
-import app.d3v3l.todoc.model.Project;
 import app.d3v3l.todoc.model.Task;
-import app.d3v3l.todoc.repositories.ProjectDataRepository;
 import app.d3v3l.todoc.repositories.TaskDataRepository;
 
 import java.util.List;
@@ -22,10 +16,6 @@ public class MainActivityViewModel extends ViewModel {
     //Executor
     private static Executor mExecutor;
     public long currentProjectIdFilter;
-
-    // DATA
-    //@Nullable
-    //private LiveData<List<Project>> currentProjects;
 
     public MainActivityViewModel(TaskDataRepository taskDataSource, Executor executor) {
         //this.projectDataSource = projectDataSource;

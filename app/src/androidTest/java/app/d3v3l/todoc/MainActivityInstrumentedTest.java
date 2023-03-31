@@ -8,7 +8,7 @@ import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static app.d3v3l.todoc.utils.TestUtils.withRecyclerView;
 
 import android.view.View;
@@ -24,6 +24,8 @@ import androidx.test.rule.ActivityTestRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Objects;
 
 import app.d3v3l.todoc.ui.MainActivity;
 import app.d3v3l.todoc.utils.DeleteFirstTaskInTasksList;
@@ -42,7 +44,7 @@ public class MainActivityInstrumentedTest {
     public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
 
     @Test
-    public void addAndRemoveTask() throws InterruptedException {
+    public void addAndRemoveTask() {
 
         MainActivity activity = rule.getActivity();
         TextView lblNoTask = activity.findViewById(R.id.lbl_no_task);
@@ -50,7 +52,7 @@ public class MainActivityInstrumentedTest {
         ViewAction deleteFirstTaskInTasksList = new DeleteFirstTaskInTasksList();
 
         // empty the tasks
-        int numberOfViewHolder = listTasks.getAdapter().getItemCount();
+        int numberOfViewHolder = Objects.requireNonNull(listTasks.getAdapter()).getItemCount();
         for (int i = 0; i < numberOfViewHolder; i++) {
             onView(ViewMatchers.withId(R.id.list_tasks))
                     .perform(RecyclerViewActions.actionOnItemAtPosition(0, deleteFirstTaskInTasksList));
@@ -77,13 +79,13 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
-    public void sortTasks() throws InterruptedException {
+    public void sortTasks() {
         MainActivity activity = rule.getActivity();
         ViewAction deleteFirstTaskInTasksList = new DeleteFirstTaskInTasksList();
         RecyclerView listTasks = activity.findViewById(R.id.list_tasks);
 
         // empty the tasks
-        int numberOfViewHolder = listTasks.getAdapter().getItemCount();
+        int numberOfViewHolder = Objects.requireNonNull(listTasks.getAdapter()).getItemCount();
         for (int i = 0; i < numberOfViewHolder; i++) {
             onView(ViewMatchers.withId(R.id.list_tasks))
                     .perform(RecyclerViewActions.actionOnItemAtPosition(0, deleteFirstTaskInTasksList));
@@ -150,13 +152,13 @@ public class MainActivityInstrumentedTest {
 
 
     @Test
-    public void filterTasks() throws InterruptedException {
+    public void filterTasks() {
         MainActivity activity = rule.getActivity();
         ViewAction deleteFirstTaskInTasksList = new DeleteFirstTaskInTasksList();
         RecyclerView listTasks = activity.findViewById(R.id.list_tasks);
 
         // empty the tasks
-        int numberOfViewHolder = listTasks.getAdapter().getItemCount();
+        int numberOfViewHolder = Objects.requireNonNull(listTasks.getAdapter()).getItemCount();
         for (int i = 0; i < numberOfViewHolder; i++) {
             onView(ViewMatchers.withId(R.id.list_tasks))
                     .perform(RecyclerViewActions.actionOnItemAtPosition(0, deleteFirstTaskInTasksList));
