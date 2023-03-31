@@ -44,13 +44,7 @@ public class MainActivityViewModel extends ViewModel {
 
 
     public LiveData<List<Task>> getTasks() {
-        if (currentProjectIdFilter==0) {
-            // No filter > return all tasks
-            return taskDataSource.getTasks();
-        } else {
-            // filter on Project Id
-            return taskDataSource.getTasksByProjectId(currentProjectIdFilter);
-        }
+        return taskDataSource.getTasks();
     }
 
     public void setCurrentProjectIdFilter(long idProject) {
