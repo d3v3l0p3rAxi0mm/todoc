@@ -26,7 +26,7 @@ public abstract class TodocDatabase extends RoomDatabase {
 
     // --- INSTANCE ---
     // We should never used '.allowMainThreadQueries()'
-    //TODO remove allowMainThreadQueries()
+    //TODO remove allowMainThreadQueries() in the next release
 
     public static TodocDatabase getInstance(Context context) {
         if (INSTANCE == null) {
@@ -48,7 +48,6 @@ public abstract class TodocDatabase extends RoomDatabase {
             @Override
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
                 super.onCreate(db);
-
                 Project[] projects = Project.getAllProjects();
                 for (Project project : projects) {
                     Executors.newSingleThreadExecutor().execute(() -> INSTANCE.projectDao()

@@ -1,4 +1,4 @@
-package app.d3v3l.todoc.database.injection;
+package app.d3v3l.todoc.injection;
 
 import android.content.Context;
 
