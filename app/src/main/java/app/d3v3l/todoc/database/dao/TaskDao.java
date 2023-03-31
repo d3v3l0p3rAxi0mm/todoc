@@ -6,7 +6,6 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 
 import app.d3v3l.todoc.model.Task;
 
@@ -23,9 +22,6 @@ public interface TaskDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void createTask(Task task);
-
-    @Update
-    void updateTask(Task task);
 
     @Delete
     void deleteTask(Task task);
