@@ -56,6 +56,7 @@ public class Project {
                 new Project(1, "Projet Tartampion", 0xFFEADAD1),
                 new Project(2, "Projet Lucidia", 0xFFB4CDBA),
                 new Project(3, "Projet Circus", 0xFFA3CED2),
+                new Project(4, "Projet Alibaba", 0xFFFAB63E)
         };
     }
 

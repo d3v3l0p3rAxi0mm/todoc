@@ -78,6 +78,7 @@
               <option name="preferredColumnWidths">
                 <map>
                   <entry key="Duration" value="126" />
+                  <entry key="Nexus_5_API_21" value="120" />
                   <entry key="Pixel_5_API_29_Android_10.0_" value="156" />
                   <entry key="Tests" value="396" />
                 </map>
