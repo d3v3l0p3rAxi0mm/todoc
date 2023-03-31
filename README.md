@@ -15,3 +15,6 @@ All this while respecting the principles of Android Architecture Components.
 
 ## Screenshots
 ![Image text](/app/src/main/res/drawable/todoc.png)
+![Image text](/app/src/main/res/drawable/todo2.png)
+![Image text](/app/src/main/res/drawable/todo3.png)
+![Image text](/app/src/main/res/drawable/todo4.png)
